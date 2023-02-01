@@ -1,0 +1,68 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// Define the struct for an NFT representing fractional ownership of real estate
+type NFT struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	AssetID  string `json:"asset_id"`
+	OwnerID  string `json:"owner_id"`
+	Fraction float64 `json:"fraction"`
+}
+
+// Define the endpoint for getting the details of an NFT
+func GetNFT(w http.ResponseWriter, r *http.Request) {
+	nftID := r.URL.Query().Get("id")
+	nft, err := getNFTByID(nftID)
+	if err != nil {
+		http.Error(w, "Error fetching NFT details", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(nft)
+}
+
+// Define the endpoint for creating a new NFT
+func CreateNFT(w http.ResponseWriter, r *http.Request) {
+	var nft NFT
+	err := json.NewDecoder(r.Body).Decode(&nft)
+	if err != nil {
+		http.Error(w, "Error decoding NFT data", http.StatusBadRequest)
+		return
+	}
+
+	nft, err = createNFT(nft)
+	if err != nil {
+		http.Error(w, "Error creating NFT", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(nft)
+}
+
+func main() {
+	http.HandleFunc("/nft", GetNFT)
+	http.HandleFunc("/nft/create", CreateNFT)
+
+	fmt.Println("Starting server on port 8080")
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Println("Error starting server: ", err)
+	}
+}
+
+// Placeholder functions for getting and creating NFTs (to be implemented later)
+func getNFTByID(id string) (NFT, error) {
+	return NFT{}, nil
+}
+
+func createNFT(nft NFT) (NFT, error) {
+	return NFT{}, nil
+}
